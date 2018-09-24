@@ -18,6 +18,21 @@ namespace FeedApi.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Feed>()
+            .Property(b => b.CreatedAt)
+            .HasDefaultValueSql("SYSUTCDATETIME()");
+            builder.Entity<FeedCollection>()
+          .Property(b => b.CreatedAt)
+          .HasDefaultValueSql("SYSUTCDATETIME()");
+
+            builder.Entity<FeedCollectionsFeed>()
+        .Property(b => b.CreatedAt)
+        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+            builder.Entity<FeedCollection>()
+             .Property(b => b.LastUpdate)
+                .ValueGeneratedOnUpdate();
         }
 
         public virtual DbSet<Feed> Feeds { get; set; }

@@ -10,9 +10,9 @@ namespace FeedApi.Model
         public long Id { get; set; }
         public String Uri { get; set; }
         public String Type { get; set; }
-        public DateTime CreateddAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
 
-        public virtual List<FeedCollection> FeedCollections { get; set; }
+        public virtual ICollection<FeedCollectionsFeed> FeedCollections { get; set; }
     }
 }

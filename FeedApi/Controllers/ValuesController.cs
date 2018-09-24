@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Rss;
@@ -16,6 +18,7 @@ namespace FeedApi.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+      
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
@@ -23,6 +26,7 @@ namespace FeedApi.Controllers
 
             return new string[] { "value1", "value2" };
         }
+        [Authorize]
 
         // GET api/values/5
         // [Route("/api/values/{url?}")]
@@ -32,15 +36,18 @@ namespace FeedApi.Controllers
         {
             str = @"https://www.liga.net/biz/all/rss.xml";
 
-            var a = new RssXmlFeedReader();
-           return a.A(str).Result;
-
+            // var a = new RssXmlFeedReader();
+            //  return a.A(str).Result;
+            return null;
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromForm] string value)
         {
+
+            var user = User;
         }
 
         // PUT api/values/5

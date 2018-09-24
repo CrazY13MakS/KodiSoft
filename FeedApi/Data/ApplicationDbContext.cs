@@ -15,7 +15,14 @@ namespace FeedApi.Data
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+        }
+
         public virtual DbSet<Feed> Feeds { get; set; }
         public virtual DbSet<FeedCollection> FeedCollections { get; set; }
+        public virtual DbSet<FeedCollectionsFeed> FeedCollectionsFeeds { get; set; }
+
     }
 }

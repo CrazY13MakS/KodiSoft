@@ -26,18 +26,19 @@ namespace FeedApi.Controllers
 
             return new string[] { "value1", "value2" };
         }
-        [Authorize]
+       // [Authorize]
 
         // GET api/values/5
-        // [Route("/api/values/{url?}")]
+       // [Route("/api/values/{*url}")]
         [HttpGet("{*str}")]
-        //[HttpGet]
+       // [HttpGet]
         public async Task<ActionResult<string>> Get(String str)
         {
             str = @"https://www.liga.net/biz/all/rss.xml";
 
-            // var a = new RssXmlFeedReader();
-            //  return a.A(str).Result;
+            var a = new Parser.RssFeedParser();
+            var res = await a.ParseAsync(str);
+            return await new Parser.FeedToRssStringWriter().Write(res);
             return null;
         }
 

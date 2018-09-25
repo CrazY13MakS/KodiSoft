@@ -1,47 +1,60 @@
 ﻿using FeedApi.Data;
 using FeedApi.Model;
 using FeedApi.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace FeedApi.Implementation
 {
     public class FeedRepository : IRepository<Feed>
     {
-        private readonly IMemoryCache _memoryCache;
         private readonly ApplicationDbContext _dbContext;
-        public FeedRepository(IMemoryCache cache, ApplicationDbContext dbContext)
+        public FeedRepository(ApplicationDbContext dbContext)
         {
-            _memoryCache = cache;
             _dbContext = dbContext;
         }
 
-        public Task<bool> Delete(long id)
+        public async Task<bool> Delete(long id)
         {
-            throw new NotImplementedException();
+            var entity = await _dbContext.Feeds.FirstOrDefaultAsync(x => x.Id == id);
+            if (entity != null)
+            {
+                _dbContext.Feeds.Remove(entity);
+                return await _dbContext.SaveChangesAsync() == 1;
+            }
+            return false;
         }
 
-        public Task<Feed> GetById(long id)
+        public async Task<Feed> FirstOrDefault(Expression<Func<Feed, bool>> func)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Feeds.FirstOrDefaultAsync(func);
         }
 
-        public Task<List<Feed>> GetList(int take, int skip = 0)
+        public async Task<Feed> GetById(long id)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Feeds.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<bool> Insert(Feed value)
+        public async Task<List<Feed>> GetList(int take, int skip = 0)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Feeds.Skip(skip).Take(take).ToListAsync();
         }
 
-        public Task<bool> Update(Feed value)
+        public async Task<Feed> Insert(Feed value)
         {
-            throw new NotImplementedException();
+            var res = await _dbContext.Feeds.AddAsync(value);
+            return res.Entity;
+        }
+
+        public async Task<bool> Update(Feed value)
+        {
+            _dbContext.Feeds.Update(value);
+            return await _dbContext.SaveChangesAsync() == 1;
         }
     }
 }

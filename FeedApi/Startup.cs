@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FeedApi.Data;
+﻿using FeedApi.Data;
 using FeedApi.Implementation;
 using FeedApi.Infrastructure;
 using FeedApi.Model;
@@ -19,6 +14,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Parser;
+using Parser.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FeedApi
 {
@@ -70,6 +72,7 @@ namespace FeedApi
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSingleton<ITokenService, TokenGenerator>();
+            services.AddTransient<IFeedParserFactory, ParserFactory>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -83,11 +86,11 @@ namespace FeedApi
             {
                 app.UseHsts();
             }
-           
+
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
-            app.UseMvc(            );
+            app.UseMvc();
         }
     }
 }

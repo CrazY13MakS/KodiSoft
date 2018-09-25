@@ -9,5 +9,6 @@ namespace Parser.Model
     public interface IFeedWriter
     {
         Task<String> Write(ISyndicationFeedOutput syndicationFeed); 
+        Task<String> WriteCollection(IEnumerable<ISyndicationFeedOutput> collection);
     }
 }

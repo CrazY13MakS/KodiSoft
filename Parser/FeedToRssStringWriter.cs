@@ -29,5 +29,10 @@ namespace Parser
             }
             return Task.FromResult(sw.ToString());
         }
+
+        public Task<string> WriteCollection(IEnumerable<ISyndicationFeedOutput> collection)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -12,11 +12,11 @@ using System.Xml;
 
 namespace Parser
 {
-    public class AtomXmlFeedReader : ParserBase
+    public class AtomFeedReader : ParserBase
     {
         readonly ISyndicationFeedParser _parser;
 
-        public AtomXmlFeedReader(ISyndicationFeedParser parser = null) : base(new List<SourceType>(new[] { SourceType.Atom }))
+        public AtomFeedReader(ISyndicationFeedParser parser = null) : base(new List<SourceType>(new[] { SourceType.Atom }))
         {
             _parser = parser ?? new AtomParser();
         }

@@ -1,5 +1,6 @@
 ﻿using FeedApi.Model;
 using FeedApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 namespace FeedApi.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class FeedController : ControllerBase
     {
@@ -21,57 +23,61 @@ namespace FeedApi.Controllers
         private readonly IRepository<FeedCollectionsFeed> _feedCollectionsFeedRepository;
         private readonly ICacheManager<ISyndicationFeedOutput, long> _cacheManagerInput;
         private readonly UserManager<ApplicationUser> _userManager;
-
-        private readonly String _userId;
+        IFeedWriterFactory _writerFactory;
+        ISourceTypeParser _sourceTypeParser;
 
         public FeedController(
             IRepository<Feed> feedRepository,
             IRepository<FeedCollection> feedCollectionRepository,
             IRepository<FeedCollectionsFeed> feedCollectionsFeedRepository,
             ICacheManager<ISyndicationFeedOutput, long> cacheManagerInput,
-             UserManager<ApplicationUser> userManager)
+             UserManager<ApplicationUser> userManager,
+             IFeedWriterFactory writerFactory,
+             ISourceTypeParser sourceTypeParser)
         {
             _cacheManagerInput = cacheManagerInput;
             _feedCollectionRepository = feedCollectionRepository;
             _feedRepository = feedRepository;
             _feedCollectionsFeedRepository = feedCollectionsFeedRepository;
             _userManager = userManager;
-            _userId = _userManager.GetUserId(User);
+            _writerFactory = writerFactory;
+            _sourceTypeParser = sourceTypeParser;
         }
 
 
-        [HttpPost("api/feed/createcollection")]
-        public async Task<IActionResult> CreateFeedCollection(String name)
+
+        [HttpPost("/createcollection")]
+        public async Task<IActionResult> CreateFeedCollection([FromBody] String name)
         {
             var result = await _feedCollectionRepository.Insert(new FeedCollection() { Name = name, UserId = _userManager.GetUserId(User) });
             return new JsonResult(result.Id);
         }
 
-        [HttpPost("api/feed/addfeed")]
-        public async Task<IActionResult> AddFeedToCollection(String feedUri, long collectionId)
+        [HttpPost("/addfeed")]
+        public async Task<IActionResult> AddFeedToCollection(AddFeedModel model)
         {
-            if (String.IsNullOrWhiteSpace(feedUri))
+            if (String.IsNullOrWhiteSpace(model.Uri))
             {
-                return BadRequest(nameof(feedUri));
+                return BadRequest(nameof(model.Uri));
             }
-            var collection = await _feedCollectionRepository.GetById(collectionId);
-            if(collection==null)
+            var collection = await _feedCollectionRepository.GetById(model.Id);
+            if (collection == null)
             {
-                return BadRequest(nameof(collectionId));
+                return BadRequest(nameof(model.Id));
             }
-            if (collection.UserId != _userId)
+            if (collection.UserId != _userManager.GetUserId(User))
             {
                 Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
                 return null;
             }
-            feedUri = feedUri.ToLower();
-            var feed = await _feedRepository.FirstOrDefault(x => x.Uri == feedUri);
+            model.Uri = model.Uri.ToLower();
+            var feed = await _feedRepository.FirstOrDefault(x => x.Uri == model.Uri);
             if (feed == null)
             {
                 feed = new Feed()
                 {
-                    Uri = feedUri,
-                    Type = "rss"
+                    Uri = model.Uri,
+                    Type = _sourceTypeParser.GetSourceType(model.Uri).ToString()
                 };
                 feed = await _feedRepository.Insert(feed);
             }
@@ -83,21 +89,21 @@ namespace FeedApi.Controllers
                                               });
             return Ok();
         }
-
-        [HttpGet("api/feed/{id}")]
-        public async Task<IActionResult> GetNews(long collectionId)
+        [Route("/news/{id}")]
+       [HttpGet]
+        public async Task<IActionResult> GetNews(long id)
         {
-            var collection = await _feedCollectionRepository.GetById(collectionId);
+            var collection = await _feedCollectionRepository.GetById(id);
             if (collection == null)
             {
-                return BadRequest(nameof(collectionId));
+                return BadRequest(nameof(id));
             }
-            if (collection.UserId != _userId)
+            if (collection.UserId != _userManager.GetUserId(User))
             {
                 Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
                 return null;
             }
-            if(collection.FeedCollections.Count==0)
+            if (collection.FeedCollections.Count == 0)
             {
                 return NoContent();
             }
@@ -107,10 +113,9 @@ namespace FeedApi.Controllers
             {
                 news.Add(await _cacheManagerInput.GetItemAsync(item.FeedId));
             }
-            var a = await _cacheManagerInput.GetItemAsync(1);
-            
-            return new JsonResult(0);
+            var writer = _writerFactory.FeedWriter(OutputType.Rss);
+            var response = await writer.WriteCollection(news);
+            return Ok(response);
         }
-
     }
 }

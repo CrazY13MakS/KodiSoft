@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Parser
 {
-    class FeedWriterFactory : IFeedWriterFactory
+  public  class FeedWriterFactory : IFeedWriterFactory
     {
         public IFeedWriter FeedWriter(OutputType outputType)
         {

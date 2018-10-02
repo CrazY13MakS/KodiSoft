@@ -42,7 +42,7 @@ namespace Parser
         private async Task<ISyndicationFeedOutput> ParseString(String path)
         {
             var feedResult = new FeedOutput();
-
+            feedResult.SourceType = SourceType.Rss;
             using (var xmlReader = XmlReader.Create(path, new XmlReaderSettings() { Async = true }))
             {
                 var feedReader = new Microsoft.SyndicationFeed.Rss.RssFeedReader(xmlReader, _parser);

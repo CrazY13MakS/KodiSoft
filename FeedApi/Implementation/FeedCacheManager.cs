@@ -5,6 +5,7 @@ using Parser;
 using Parser.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -31,13 +32,15 @@ namespace FeedApi.Implementation
             }
             //var parser=  _parserFactory.CreateParser(TypeConverter.GetSourceType(feedItem.Type));
             // var result = await parser.ParseAsync(feedItem.Uri);
-
-            return await _memoryCache.GetOrCreateAsync<ISyndicationFeedOutput>(feedItem.Uri, (x) =>
+            var a = await _memoryCache.GetOrCreateAsync<ISyndicationFeedOutput>(feedItem.Uri, (x) =>
             {
+                Debug.WriteLine(x.Key);
+                Debug.WriteLine("aaaaaaaaaaaaaaaaa");
                 x.SlidingExpiration = TimeSpan.FromMinutes(30);
                 var parser = _parserFactory.CreateParser(TypeConverter.GetSourceType(feedItem.Type));
-                return parser.ParseAsync(feedItem.Uri);
+                return  parser.ParseAsync(feedItem.Uri);
             });
+            return a;
 
         }
     }

@@ -69,10 +69,15 @@ namespace FeedApi
             });
 
 
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+        services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSingleton<ITokenService, TokenGenerator>();
-            services.AddTransient<IFeedParserFactory, ParserFactory>();
+            services.AddScoped<IFeedParserFactory, ParserFactory>();
+            services.AddScoped<IRepository<Feed>, FeedRepository>();
+            services.AddScoped<IRepository<FeedCollection>, FeedCollectionRepository>();
+            services.AddScoped<IRepository<FeedCollectionsFeed>, FeedCollectionFeedRepository>();
+            services.AddScoped<ICacheManager<ISyndicationFeedOutput, long>, FeedCacheManager>();
+            services.AddScoped<IFeedWriterFactory, FeedWriterFactory>();
+            services.AddScoped<ISourceTypeParser, SourceTypeParser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,7 +92,7 @@ namespace FeedApi
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+          //  app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseMvc();

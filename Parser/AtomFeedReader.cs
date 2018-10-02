@@ -43,10 +43,11 @@ namespace Parser
         private async Task<ISyndicationFeedOutput> ParseString(String path)
         {
             var feedResult = new FeedOutput();
+            feedResult.SourceType = SourceType.Atom;
 
             using (var xmlReader = XmlReader.Create(path, new XmlReaderSettings() { Async = true }))
             {
-                var feedReader = new Microsoft.SyndicationFeed.Rss.RssFeedReader(xmlReader, _parser);
+                var feedReader = new Microsoft.SyndicationFeed.Atom.AtomFeedReader(xmlReader);//, _parser);
 
                 while (await feedReader.Read())
                 {
@@ -57,6 +58,8 @@ namespace Parser
                             break;
 
                         case SyndicationElementType.Image:
+
+                            //atomFormatter.Format(await feedReader.ReadImage());
                             feedResult.Images.Add(await feedReader.ReadImage());
                             break;
 

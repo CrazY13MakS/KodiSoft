@@ -13,5 +13,7 @@ namespace Parser.Model
         ICollection<ISyndicationPerson> Persons { get; set; }
         ICollection<ISyndicationContent> Content { get; set; }
         ICollection<ISyndicationImage> Images { get; set; }
+        SourceType SourceType { get; set; }
+
     }
 }

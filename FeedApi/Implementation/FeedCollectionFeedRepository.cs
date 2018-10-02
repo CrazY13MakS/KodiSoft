@@ -58,6 +58,7 @@ namespace FeedApi.Implementation
         public async Task<FeedCollectionsFeed> Insert(FeedCollectionsFeed value)
         {
             var res = await _dbContext.FeedCollectionsFeeds.AddAsync(value);
+           await _dbContext.SaveChangesAsync();
             return res.Entity;
         }
 
